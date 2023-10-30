@@ -6,9 +6,9 @@ const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 
-const index = require('./routes/index')
+const login = require('./routes/login')
 const users = require('./routes/users')
-
+const manager = require('./routes/manager')
 // error handler
 onerror(app)
 
@@ -33,9 +33,9 @@ app.use(async (ctx, next) => {
 })
 
 // routes
-app.use(index.routes(), index.allowedMethods())
+app.use(login.routes(), login.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
-
+app.use(manager.routes(), manager.allowedMethods())
 // error-handling
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)

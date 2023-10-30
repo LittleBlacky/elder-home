@@ -7,20 +7,22 @@ const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: 'qwejyx1004plm',
-  database: 'js20080111'
+  database: 'elderHome'
 });
 
 router.get('/', async (ctx, next) => {
   await ctx.render('index')
 })
 
-router.get('/string', async (ctx, next) => {
-  ctx.body = 'koa2 string'
-})
-
-router.get('/json', async (ctx, next) => {
-  ctx.body = {
-    title: 'koa2 json'
+router.get('/login', async (ctx, next) => {
+  const connection = await pool.getConnection();
+  try {
+  	const [rows, fileds] = await connection.query(
+  		`SELECT * FROM login WHERE loginName = '${123}' AND password = ${123}`,
+  	);
+  	ctx.body = (rows.length == 1)
+  } finally {
+  	connection.release();
   }
 })
 
