@@ -21,7 +21,10 @@
     "koa-static": "^5.0.0",
     "koa-views": "^6.3.1",
     "mysql2": "^3.6.2",
-    "pug": "^2.0.3"
+    "pug": "^2.0.3",
+	"vue-router": "^3.5.3",
+	"element-ui": "^2.15.6",
+	npminstall"vue": "^2.6.10"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
