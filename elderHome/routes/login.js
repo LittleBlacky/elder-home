@@ -14,11 +14,13 @@ router.get('/', async (ctx, next) => {
   await ctx.render('index')
 })
 
-router.get('/login', async (ctx, next) => {
+//登录
+router.post('/login', async (ctx, next) => {
   const connection = await pool.getConnection();
+  console.log(ctx.request.body)
   try {
   	const [rows, fileds] = await connection.query(
-  		`SELECT * FROM login WHERE loginName = '${123}' AND password = ${123}`,
+  		`SELECT * FROM userInfo WHERE loginName = '${ctx.request.body.loginName}' AND password = ${ctx.request.body.password}`,
   	);
   	ctx.body = (rows.length == 1)
   } finally {
