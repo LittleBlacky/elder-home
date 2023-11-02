@@ -19,7 +19,7 @@ router.get('/add', async (ctx, next) => {
     let event = ctx.request.query.event;
     let leaveTime = parseInt(ctx.request.query.leaveTime);
     let backTime = parseInt(ctx.request.query.backTime);
-    let eventID = (new Date()).valueOf().toString()+loginName;
+    let eventID = (new Date()).valueOf().toString() + loginName;
     try {
         let [rows, fileds] = await connection.query(
             `INSERT INTO \`goouter\`(\`loginName\`, \`leaveTime\`, \`backTime\`, \`event\`, \`eventID\`, \`status\`) 
@@ -37,11 +37,11 @@ router.get('/add', async (ctx, next) => {
 router.post('/search', async (ctx, next) => {
     const connection = await pool.getConnection();
     let loginName = ctx.request.body.loginName;
-    let page = (parseInt(ctx.request.body.page)-1)*10;
+    let page = (parseInt(ctx.request.body.page) - 1) * 10;
     let nowTime = (new Date()).valueOf();
     let result = {}
     //console.log(ctx.request.body)
-    if(loginName === '')
+    if (loginName === '')
         loginName = '%'
     try {
         let [rows, fileds] = await connection.query(
@@ -55,7 +55,7 @@ router.post('/search', async (ctx, next) => {
         );
         result['result'] = rows
         rows = []
-        [rows, fileds] = await connection.query(
+            [rows, fileds] = await connection.query(
             `SELECT COUNT(*) as total FROM goouter`,
         );
         //console.log(rows)
@@ -70,7 +70,7 @@ router.post('/search', async (ctx, next) => {
 //审核出门申请
 //[eventID:'', OP:]
 //OP: -1驳回，0审核中, 1通过, 2超时
-router.post('/check',  async (ctx, next) => {
+router.post('/check', async (ctx, next) => {
     const connection = await pool.getConnection();
     let eventID = ctx.request.body.eventID;
     let status = parseInt(ctx.request.body.OP);

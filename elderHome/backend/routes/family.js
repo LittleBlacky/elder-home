@@ -14,9 +14,9 @@ router.prefix('/family');
 //前端给出 ['page': , 'loginName': ]
 //OP为需要查询的指定数据名
 router.post('/search', async (ctx, next) => {
-    let page = (parseInt(ctx.request.body.page)-1)*10;
+    let page = (parseInt(ctx.request.body.page) - 1) * 10;
     let loginName = ctx.request.body.loginName;
-    if(loginName === '')
+    if (loginName === '')
         loginName = '%';
     const connection = await pool.getConnection();
     try {
