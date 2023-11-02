@@ -13,12 +13,13 @@ router.prefix('/goouter')
 //请假申请
 //leaveTime 和 backTime 必须是时间戳
 //[leaveTime: 1, backTime: 1, event, loginName]
-router.get('/add', async (ctx, next) => {
+router.post('/add', async (ctx, next) => {
     const connection = await pool.getConnection();
-    let loginName = ctx.request.query.loginName;
-    let event = ctx.request.query.event;
-    let leaveTime = parseInt(ctx.request.query.leaveTime);
-    let backTime = parseInt(ctx.request.query.backTime);
+    console.log(ctx.request.body);
+    let loginName = ctx.request.body.content.loginName;
+    let event = ctx.request.body.content.event;
+    let leaveTime = parseInt(ctx.request.body.content.leaveTime);
+    let backTime = parseInt(ctx.request.body.content.backTime);
     let eventID = (new Date()).valueOf().toString() + loginName;
     try {
         let [rows, fileds] = await connection.query(
@@ -71,7 +72,7 @@ router.post('/search', async (ctx, next) => {
 //[eventID:'', OP:]
 //OP: -1驳回，0审核中, 1通过, 2超时
 router.post('/check', async (ctx, next) => {
-    const connection = await pool.getConnection();
+    //const connection = await pool.getConnection();
     let eventID = ctx.request.body.eventID;
     let status = parseInt(ctx.request.body.OP);
     try {

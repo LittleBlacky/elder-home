@@ -47,20 +47,18 @@ router.post('/all', async (ctx, next) => {
 //查找指定用户的指定内容
 //loginName为字符串， OP为列表类型, talble为字符串
 //[loginName: '', OP: [''], table: '']
-router.get('/searchUser', async (ctx, next) => {
+router.post('/searchUser', async (ctx, next) => {
     const connection = await pool.getConnection();
-    let table = ctx.request.query.table;
-    let loginName = ctx.request.query.loginName;
-    let OP = ctx.request.query.OP;
+    console.log(ctx.request.body);
+    let table = ctx.request.body.table;
+    let loginName = ctx.request.body.loginName;
+    let OP = ctx.request.body.OP;
     let op = OP[0];
-    if (OP.length === 0)
-        op = '*';
-    else
-        for (let i = 0; i < OP.length; ++i)
-            op += ', ' + OP[i];
+    for (let i = 1; i < OP.length; ++i)
+        op += ', ' + OP[i];
     try {
         const [rows, fileds] = await connection.query(
-            'SELECT ' + op + ` FROM ${table}` + `WHERE loginName = '${loginName}'`,
+            'SELECT ' + op + ` FROM ${table}` + ` WHERE loginName = '${loginName}'`,
         );
         ctx.body = rows;
     } finally {
@@ -114,12 +112,12 @@ router.post('/update', async (ctx, next) => {
     content = ctx.request.body.content;
     let loginName = ctx.request.body.loginName;
     try {
-        let sql = `UPDATE ${OP} SET `;
+        let sql = `UPDATE \`${OP}\` SET `;
         let i = 0;
         for (const [key, values] of Object.entries(content)) {
             if (i > 0)
                 sql += ', ';
-            sql += `${key}='${values}'`;
+            sql += `\`${key}\`='${values}'`;
             ++i;
         }
         sql += ` WHERE loginName = '${loginName}' `;
@@ -127,7 +125,7 @@ router.post('/update', async (ctx, next) => {
         await connection.query(
             sql
         );
-        ctx.body = 'ok';
+        ctx.body = {'result': 'ok'};
     } finally {
         connection.release();
     }
