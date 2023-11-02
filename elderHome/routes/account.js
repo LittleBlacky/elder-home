@@ -90,7 +90,7 @@ router.get('/delete', async (ctx, next) => {
     const connection = await pool.getConnection();
     let table = ctx.request.query.table;
     if(table.length === 0)
-        table = ['domitory', 'family', 'leave', 'userinfo'];
+        table = ['domitory', 'family', 'leave', 'userinfo', 'goouter'];
     let loginName = ctx.request.query.loginName;
     try {
         for(let i = 0; i < table.length; ++i)
@@ -106,14 +106,13 @@ router.get('/delete', async (ctx, next) => {
 //更新用户内容
 //OP为指定表, content为内容, loginName为用户ID
 //[OP:'', content: {'key':value, }, loginName: '']
-router.get('/update', async (ctx, next) => {
+router.post('/update', async (ctx, next) => {
     const connection = await pool.getConnection();
-    let table = ctx.request.query.table;
+    console.log(ctx.request.body);
+    let OP = ctx.request.body.OP;
     let content = {};
-    content = ctx.request.query.content;
-    if(table.length === 0)
-        table = ['domitory', 'family', 'leave', 'userinfo'];
-    let loginName = ctx.request.query.loginName;
+    content = ctx.request.body.content;
+    let loginName = ctx.request.body.loginName;
     try {
         let sql = `UPDATE ${OP} SET `;
         let i = 0;
@@ -121,9 +120,11 @@ router.get('/update', async (ctx, next) => {
         {
             if(i > 0)
                 sql += ', ';
-            sql += `${key}=${values}`;
+            sql += `${key}='${values}'`;
             ++i;
         }
+        sql += ` WHERE loginName = '${loginName}' `;
+        //console.log(sql)
         await connection.query(
             sql
         );

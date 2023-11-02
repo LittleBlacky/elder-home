@@ -1,7 +1,4 @@
-const cors = require('@koa/cors');
-const serve = require('koa-static');
 const mysql = require('mysql2/promise');
-const {parse} = require("nodemon/lib/cli");
 const router = require('koa-router')();
 
 const pool = mysql.createPool({
@@ -17,8 +14,9 @@ router.prefix('/domitory');
 //如果为空，意味着查找指定页的内容
 router.post('/search',  async (ctx, next) => {
   const connection = await pool.getConnection();
+  console.log(ctx.request.body)
   let domitoryID = ctx.request.body.domitoryID;
-  let page = (ctx.request.body.page-1)*10;
+  let page = (parseInt(ctx.request.body.page)-1)*10;
   let result = {};
   if(domitoryID === null || domitoryID === '')
     domitoryID = '%';
@@ -26,9 +24,8 @@ router.post('/search',  async (ctx, next) => {
     page = 0;
   try {
     let [rows, fileds] = await connection.query(
-        `SELECT domitory.domitoryID, (2-COUNT(*)) AS counts, GROUP_CONCAT(userinfo.loginName) AS loginID
+        `SELECT domitory.domitoryID, (2-COUNT(*)) AS counts, GROUP_CONCAT(domitory.loginName) AS loginID
          FROM domitory
-         JOIN userinfo ON domitory.loginName = userinfo.loginName
          WHERE domitory.domitoryID LIKE '${domitoryID}'
          GROUP BY domitory.domitoryID
          LIMIT ${page}, 10`,
@@ -36,10 +33,42 @@ router.post('/search',  async (ctx, next) => {
     result['result'] = rows;
     rows = [];
     [rows, fileds] = await connection.query(
-        `SELECT COUNT(*) as total FROM domitory`,
+        `SELECT COUNT(*) as total FROM (SELECT COUNT(*) FROM domitory GROUP BY domitoryID) s`,
     );
-    result['total'] = rows[0][0];
+    result['total'] = rows[0]['total'];
     ctx.body = result;
+  } finally {
+    connection.release();
+  }
+})
+
+// 宿舍增加人员
+// /domitory/add
+// [domitoryID: '', loginName: '']
+router.post('/add',  async (ctx, next) => {
+  const connection = await pool.getConnection();
+  let domitoryID = ctx.request.body.domitoryID;
+  let loginName = ctx.request.body.loginName;
+  try {
+    let [rows, fileds] = await connection.query(
+        `INSERT INTO \`domitory\`(\`loginName\`, \`domitoryID\`) VALUES ('${loginName}','${domitoryID}')`,
+    );
+    ctx.body = {result: 'ok'};
+  } finally {
+    connection.release();
+  }
+})
+
+//宿舍删除人员
+//[loginName: '']
+router.post('/delete',  async (ctx, next) => {
+  const connection = await pool.getConnection();
+  let loginName = ctx.request.body.loginName;
+  try {
+    let [rows, fileds] = await connection.query(
+        `DELETE FROM domitory WHERE loginName = '${loginName}'`,
+    );
+    ctx.body = {result: 'ok'};
   } finally {
     connection.release();
   }

@@ -40,7 +40,7 @@ router.post('/search', async (ctx, next) => {
     let page = (parseInt(ctx.request.body.page)-1)*10;
     let nowTime = (new Date()).valueOf();
     let result = {}
-    console.log(ctx.request.body)
+    //console.log(ctx.request.body)
     if(loginName === '')
         loginName = '%'
     try {
@@ -58,9 +58,9 @@ router.post('/search', async (ctx, next) => {
         [rows, fileds] = await connection.query(
             `SELECT COUNT(*) as total FROM goouter`,
         );
-        console.log(rows)
+        //console.log(rows)
         result['total'] = rows[0][0]['total']
-        console.log(result)
+        //console.log(result)
         ctx.body = result
     } finally {
         connection.release();
@@ -68,17 +68,17 @@ router.post('/search', async (ctx, next) => {
 })
 
 //审核出门申请
-//[eventID:'', OP:'']
+//[eventID:'', OP:]
 //OP: -1驳回，0审核中, 1通过, 2超时
-router.get('/check',  async (ctx, next) => {
+router.post('/check',  async (ctx, next) => {
     const connection = await pool.getConnection();
-    let eventID = ctx.request.query.eventID;
-    let status = ctx.request.query.status;
+    let eventID = ctx.request.body.eventID;
+    let status = parseInt(ctx.request.body.OP);
     try {
         let [rows, fileds] = await connection.query(
-            `UPDATE leave SET status = ${status} WHERE eventID = '${eventID}'`,
+            `UPDATE goouter SET status = ${status} WHERE eventID = '${eventID}'`,
         );
-        ctx.body = 'ok'
+        ctx.body = {result: 'ok'};
     } finally {
         connection.release();
     }
