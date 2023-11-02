@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+  <link rel="stylesheet" href="../../styles/common.css" />
+  <link rel="stylesheet" href="../../styles/page.css" />
+  <style>
+    #member-app  .notAdmin::after{
+      border: 0 !important;
+
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container" id="member-app">
+    <div class="container">
+      <el-table
+        :data="tableData"
+        stripe
+        class="tableBox"
+      >
+        <el-table-column
+          prop="loginName"
+          label="登录名"
+        ></el-table-column>
+        <el-table-column
+          prop="userName"
+          label="姓名"
+        ></el-table-column>
+        <el-table-column
+          prop="telephone"
+          label="手机号码"
+        ></el-table-column>
+       <el-table-column 
+         prop="sex"
+         label="性别"
+       >
+	   <template slot-scope="scope">
+	                   <span v-if="scope.row.sex === 1">男</span>
+	                   <span  v-else-if="scope.row.sex === 2">女</span>
+	               </template>
+	   </el-table-column>
+        <el-table-column
+          label="操作"
+          width="160"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              size="small"
+              class="blueBug"
+              @click="addMemberHandle(scope.row.id)"
+              
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="text"
+              size="small"
+              class="delBut non"
+              @click="statusHandle(scope.row)"
+              v-if="user === 'admin'"
+            >
+              {{ scope.row.status == '1' ? '禁用' : '启用' }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        class="pageList"
+        :page-sizes="[1, 20, 30, 40]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="counts"
+        :current-page.sync="page"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      ></el-pagination>
+    </div>
+  </div>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="../../plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入axios -->
+  <script src="../../plugins/axios/axios.min.js"></script>
+  <script src="../../js/request.js"></script>
+  <script src="../../api/member.js"></script>
+  <script src="../../js/validate.js"></script>
+  <script src="../../js/index.js"></script>
+  <script src="../../js/jquery-3.5.1.min.js"></script>
+	
+	<script>
+      new Vue({
+        el: '#member-app',
+        data() {
+          return {
+             input: '',
+             counts: 0,
+             page: 1,
+             pageSize: 10,
+             tableData : [],
+             id : 1,
+			 userName:'',
+			 loginName:'',
+			 telephone:'',
+			 sex: 1,
+             status : '',
+          }
+        },
+        computed: {
+	
+		},
+        created() {
+			this.loginName = requestUrlParam('loginName'),
+			console.log(this.loginName),
+            this.init()
+        },
+        mounted() {
+        },
+        methods: {
+          async init () {
+            // await getMemberList(params).then(res => {
+            //   if (String(res.code) === '1') {
+            //     this.tableData = res.data.records || []
+            //     this.counts = res.data.total
+            //   }
+            // }).catch(err => {
+            //   this.$message.error('请求出错了：' + err)
+            // })
+			
+			await $.ajax({
+			 		method: 'POST',
+			 		data: {loginName: this.loginName, OP: [], table: 'userinfo'},
+			 		url: 'https://781s6i8919.goho.co/searchUser',//ajax请求的地址
+					dataType: 'json',
+					success:  (data)=> {   //服务端成功返回会回调，执行匿名函数
+					console.log(data),
+					
+					console.log(data.total),
+					this.counts = data.total,
+					console.log(this.counts),
+					console.log(data.userInfo),
+					this.tableData =data.userInfo
+										
+				}                                 
+			})
+			
+          },
+          handleQuery() {
+            this.page = 1;
+            this.init();
+          },
+           // 添加
+          addMemberHandle (st) {
+            if (st === 'add'){
+              window.parent.menuHandle({
+                id: '2',
+                url: '/backend/page/member/add.html',
+                name: '添加员工'
+              },true)
+            } else {
+              window.parent.menuHandle({
+                id: '2',
+                url: '/backend/page/member/add.html?id='+st,
+                name: '修改员工'
+              },true)
+            }
+          },
+          //状态修改
+          statusHandle (row) {
+            this.id = row.id
+            this.status = row.status
+            this.$confirm('确认调整该账号的状态?', '提示', {
+              'confirmButtonText': '确定',
+              'cancelButtonText': '取消',
+              'type': 'warning'
+              }).then(() => {
+              enableOrDisableEmployee({ 'id': this.id, 'status': !this.status ? 1 : 0 }).then(res => {
+                console.log('enableOrDisableEmployee',res)
+                if (String(res.code) === '1') {
+                  this.$message.success('账号状态更改成功！')
+                  this.handleQuery()
+                }
+              }).catch(err => {
+                this.$message.error('请求出错了：' + err)
+              })
+            })
+          },
+          handleSizeChange (val) {
+            this.pageSize = val
+            this.init()
+          },
+          handleCurrentChange (val) {
+            this.page = val
+            this.init()
+          }
+        }
+      })
+    </script>
+</body>
+</html>
