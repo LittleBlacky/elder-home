@@ -72,7 +72,7 @@ router.post('/search', async (ctx, next) => {
 //[eventID:'', OP:]
 //OP: -1驳回，0审核中, 1通过, 2超时
 router.post('/check', async (ctx, next) => {
-    //const connection = await pool.getConnection();
+    const connection = await pool.getConnection();
     let eventID = ctx.request.body.eventID;
     let status = parseInt(ctx.request.body.OP);
     try {

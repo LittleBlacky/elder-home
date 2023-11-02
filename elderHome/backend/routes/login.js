@@ -17,12 +17,12 @@ router.get('/', async (ctx, next) => {
 //登录
 router.post('/login', async (ctx, next) => {
     const connection = await pool.getConnection();
-    console.log(ctx.request.body)
+    //console.log(`SELECT * FROM userInfo WHERE loginName = '${ctx.request.body.loginName}' AND password = '${ctx.request.body.password}' AND type = '${ctx.request.body.type}'`)
     try {
         const [rows, fileds] = await connection.query(
-            `SELECT * FROM userInfo WHERE loginName = '${ctx.request.body.loginName}' AND password = ${ctx.request.body.password}`,
+            `SELECT * FROM userInfo WHERE loginName = '${ctx.request.body.loginName}' AND password = '${ctx.request.body.password}' AND type = '${ctx.request.body.type}'`,
         );
-        ctx.body = (rows.length == 1)
+        ctx.body = (rows.length === 1)
     } finally {
         connection.release();
     }

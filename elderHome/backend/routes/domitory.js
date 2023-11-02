@@ -29,7 +29,7 @@ router.post('/search', async (ctx, next) => {
     } else {
         sql = `SELECT domitory.loginName, userInfo.userName 
            FROM domitory 
-           INNER JOIN userInfo 
+           LEFT JOIN userInfo 
            ON userInfo.loginName = domitory.loginName
            WHERE domitoryID = '${domitoryID}'`;
     }

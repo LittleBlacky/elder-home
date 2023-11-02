@@ -67,15 +67,24 @@ router.post('/searchUser', async (ctx, next) => {
 })
 
 //增加指定用户
-//前端数据：[loginName: , userName: , sex: , telephone: , type: ]
-router.get('/add', async (ctx, next) => {
+//前端数据：[loginName: , type: '', password: '']
+router.post('/add', async (ctx, next) => {
     const connection = await pool.getConnection();
     try {
-        const [rows, fileds] = await connection.query(
-            `INSERT INTO \`userInfo\`(\`loginName\`, \`userName\`, \`sex\`, \`telephone\`, \`password\`, \`type\`) 
-         VALUES('${ctx.request.query.loginName}', '${ctx.request.query.userName}', ${ctx.request.query.sex}, '${ctx.request.query.telephone}', '123456', ${ctx.request.query.type})`,
+        let [rows, fileds] = await connection.query(
+            `SELECT * FROM userinfo WHERE loginName = '${ctx.request.body.loginName}'`,
         );
-        ctx.body = 'ok';
+        if(rows.length >= 1)
+        {
+            ctx.body = {result:'该ID已经存在'};
+            connection.release();
+            return;
+        }
+        [rows, fileds] = await connection.query(
+            `INSERT INTO \`userInfo\`(\`loginName\`, \`password\`, \`type\`) 
+            VALUES('${ctx.request.body.loginName}', '${ctx.request.body.password}', '${ctx.request.body.type}')`,
+        );
+        ctx.body = {result: 'ok'};
     } finally {
         connection.release();
     }
